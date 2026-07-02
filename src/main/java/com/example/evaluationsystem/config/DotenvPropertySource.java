@@ -27,13 +27,18 @@ public class DotenvPropertySource implements ApplicationContextInitializer<Confi
 
             Map<String, Object> dotenvProperties = new HashMap<>();
 
+            // Database variables
             String dbUrl = dotenv.get("DB_URL");
             String dbUsername = dotenv.get("DB_USERNAME");
             String dbPassword = dotenv.get("DB_PASSWORD");
+            
+            // JWT variables
+            String jwtSecret = dotenv.get("JWT_SECRET");
+            String jwtExpiration = dotenv.get("JWT_EXPIRATION");
 
             if (dbUrl != null) {
                 dotenvProperties.put("DB_URL", dbUrl);
-                System.out.println("DB_URL loaded: " + dbUrl);
+                System.out.println("DB_URL loaded");
             }
             if (dbUsername != null) {
                 dotenvProperties.put("DB_USERNAME", dbUsername);
@@ -42,6 +47,18 @@ public class DotenvPropertySource implements ApplicationContextInitializer<Confi
             if (dbPassword != null) {
                 dotenvProperties.put("DB_PASSWORD", dbPassword);
                 System.out.println("DB_PASSWORD loaded");
+            }
+            
+            if (jwtSecret != null) {
+                dotenvProperties.put("JWT_SECRET", jwtSecret);
+                System.out.println("JWT_SECRET loaded");
+            } else {
+                System.err.println("WARNING: JWT_SECRET not found in .env file!");
+            }
+            
+            if (jwtExpiration != null) {
+                dotenvProperties.put("JWT_EXPIRATION", jwtExpiration);
+                System.out.println("JWT_EXPIRATION loaded");
             }
 
             if (!dotenvProperties.isEmpty()) {

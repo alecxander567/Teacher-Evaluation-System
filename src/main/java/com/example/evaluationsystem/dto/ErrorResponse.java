@@ -1,5 +1,5 @@
 // ErrorResponse.java
-package com.example.evaluationsystem.dto.admindto;
+package com.example.evaluationsystem.dto;
 
 import java.time.LocalDateTime;
 import java.util.Map;

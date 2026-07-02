@@ -1,5 +1,5 @@
 // src/main/java/com/example/evaluationsystem/dto/AdminDTO.java
-package com.example.evaluationsystem.dto.admindto;
+package com.example.evaluationsystem.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

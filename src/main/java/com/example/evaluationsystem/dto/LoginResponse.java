@@ -1,5 +1,5 @@
 // LoginResponse.java
-package com.example.evaluationsystem.dto.admindto;
+package com.example.evaluationsystem.dto;
 
 public class LoginResponse {
 

@@ -1,5 +1,5 @@
 // Admin.java
-package com.example.evaluationsystem.model.admin;
+package com.example.evaluationsystem.model;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;

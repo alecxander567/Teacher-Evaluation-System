@@ -1,7 +1,7 @@
 // src/main/java/com/example/evaluationsystem/service/AdminService.java
 package com.example.evaluationsystem.service;
 
-import com.example.evaluationsystem.model.admin.Admin;
+import com.example.evaluationsystem.model.Admin;
 import com.example.evaluationsystem.repository.AdminRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -45,6 +45,12 @@ public class AdminService {
 
     public Optional<Admin> getAdminByEmail(String email) {
         return adminRepository.findByEmail(email);
+    }
+
+    // NEW METHOD - Add this
+    public Admin findAdminByEmail(String email) {
+        return adminRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Admin not found with email: " + email));
     }
 
     public Admin updateAdmin(Long id, Admin adminDetails) {

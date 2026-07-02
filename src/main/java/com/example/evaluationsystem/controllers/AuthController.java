@@ -1,18 +1,22 @@
-// src/main/java/com/example/evaluationsystem/controllers/AdminAuthController.java
+// src/main/java/com/example/evaluationsystem/controllers/AuthController.java
 package com.example.evaluationsystem.controllers;
 
-// ALL DTO imports now use .admindto
-import com.example.evaluationsystem.dto.admindto.AdminDTO;
-import com.example.evaluationsystem.dto.admindto.ErrorResponse;
-import com.example.evaluationsystem.dto.admindto.LoginRequest;
-import com.example.evaluationsystem.dto.admindto.LoginResponse;
-import com.example.evaluationsystem.dto.admindto.SignupResponse;
-import com.example.evaluationsystem.model.admin.Admin;
+import com.example.evaluationsystem.config.JwtService;
+import com.example.evaluationsystem.dto.AdminDTO;
+import com.example.evaluationsystem.dto.ErrorResponse;
+import com.example.evaluationsystem.dto.LoginRequest;
+import com.example.evaluationsystem.dto.LoginResponse;
+import com.example.evaluationsystem.dto.SignupResponse;
+import com.example.evaluationsystem.model.Admin;
 import com.example.evaluationsystem.service.AdminService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,6 +30,15 @@ public class AuthController {
 
     @Autowired
     private AdminService adminService;
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private UserDetailsService userDetailsService;
+
+    @Autowired
+    private JwtService jwtService;
 
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@Valid @RequestBody AdminDTO adminDTO) {
@@ -72,10 +85,18 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest) {
         try {
-            Admin admin = adminService.authenticateAdmin(
-                    loginRequest.getEmail(),
-                    loginRequest.getPassword()
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            loginRequest.getEmail(),
+                            loginRequest.getPassword()
+                    )
             );
+
+            UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getEmail());
+            String token = jwtService.generateToken(userDetails);
+
+            // FIXED: Using findAdminByEmail instead of getAdminByEmail
+            Admin admin = adminService.findAdminByEmail(loginRequest.getEmail());
 
             LoginResponse response = new LoginResponse(
                     "Login successful",
@@ -84,14 +105,14 @@ public class AuthController {
                     admin.getFirstName(),
                     admin.getLastName(),
                     admin.getRole(),
-                    "dummy-jwt-token-" + System.currentTimeMillis()
+                    token
             );
 
             return ResponseEntity.ok(response);
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             ErrorResponse errorResponse = new ErrorResponse(
                     "Login failed",
-                    e.getMessage(),
+                    "Invalid email or password",
                     HttpStatus.UNAUTHORIZED.value()
             );
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);

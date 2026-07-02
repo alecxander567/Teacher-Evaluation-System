@@ -1,7 +1,7 @@
 // src/main/java/com/example/evaluationsystem/repository/AdminRepository.java
 package com.example.evaluationsystem.repository;
 
-import com.example.evaluationsystem.model.admin.Admin;
+import com.example.evaluationsystem.model.Admin;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
