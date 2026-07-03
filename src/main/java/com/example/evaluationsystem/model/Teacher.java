@@ -1,3 +1,4 @@
+// Updated Teacher.java with proper relationship
 package com.example.evaluationsystem.model;
 
 import jakarta.persistence.*;
@@ -26,6 +27,11 @@ public class Teacher {
 
     @Column(name = "department_id")
     private Integer departmentId;
+
+    // Optional: Add relationship mapping
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "department_id", insertable = false, updatable = false)
+    private Department department;
 
     @NotBlank(message = "First name is required")
     @Size(max = 100, message = "First name must not exceed 100 characters")

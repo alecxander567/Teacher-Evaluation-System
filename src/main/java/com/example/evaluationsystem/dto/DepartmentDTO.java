@@ -1,0 +1,22 @@
+// src/main/java/com/example/evaluationsystem/dto/DepartmentDTO.java
+package com.example.evaluationsystem.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class DepartmentDTO {
+    private Integer id;
+    private String name;
+    private String description;
+    private Integer teacherCount;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+}
