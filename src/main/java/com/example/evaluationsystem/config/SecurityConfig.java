@@ -3,6 +3,7 @@ package com.example.evaluationsystem.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -74,6 +75,17 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**", "/auth/**").permitAll()
                         .requestMatchers("/error").permitAll()
+
+                        // Public student-facing evaluation flow (no login required).
+                        // Kept as narrow, method-specific rules so the rest of each
+                        // controller (create/update/delete/list-all) stays protected.
+                        .requestMatchers(HttpMethod.GET, "/api/evaluation-links/validate/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/evaluation-links/token/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/evaluation-periods/{id}").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/teacher-assignments/filter").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/evaluation-forms/{id}/details").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/evaluation-submissions").permitAll()
+
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

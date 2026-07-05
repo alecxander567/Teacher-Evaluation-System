@@ -1,4 +1,4 @@
-// Updated Teacher.java with proper relationship
+// src/main/java/com/example/evaluationsystem/model/Teacher.java
 package com.example.evaluationsystem.model;
 
 import jakarta.persistence.*;
@@ -28,7 +28,6 @@ public class Teacher {
     @Column(name = "department_id")
     private Integer departmentId;
 
-    // Optional: Add relationship mapping
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "department_id", insertable = false, updatable = false)
     private Department department;
@@ -52,6 +51,10 @@ public class Teacher {
     @Size(max = 100, message = "Position must not exceed 100 characters")
     @Column(length = 100)
     private String position;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "employment_type", length = 20)
+    private EmploymentType employmentType = EmploymentType.FULL_TIME;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
