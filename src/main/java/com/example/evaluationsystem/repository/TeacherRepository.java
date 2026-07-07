@@ -35,4 +35,65 @@ public interface TeacherRepository extends JpaRepository<Teacher, Long> {
     
     // Count teachers by department
     long countByDepartmentId(Integer departmentId);
+
+    // ========== ADD THESE NEW METHODS ==========
+
+    /**
+     * Find teachers by department ID with department eagerly loaded
+     * This prevents N+1 query issues when accessing department data
+     */
+    @Query("SELECT t FROM Teacher t LEFT JOIN FETCH t.department WHERE t.departmentId = :departmentId")
+    List<Teacher> findByDepartmentIdWithDepartment(@Param("departmentId") Integer departmentId);
+
+    /**
+     * Search teachers by first name, last name, or email (case insensitive)
+     * More comprehensive search than searchByName
+     */
+    @Query("SELECT t FROM Teacher t WHERE " +
+           "LOWER(t.firstName) LIKE LOWER(CONCAT('%', :searchTerm, '%')) " +
+           "OR LOWER(t.lastName) LIKE LOWER(CONCAT('%', :searchTerm, '%')) " +
+           "OR LOWER(t.email) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
+    List<Teacher> searchTeachers(@Param("searchTerm") String searchTerm);
+
+    /**
+     * Find all teachers with their departments eagerly loaded
+     * Useful for bulk operations where you need department info
+     */
+    @Query("SELECT t FROM Teacher t LEFT JOIN FETCH t.department")
+    List<Teacher> findAllWithDepartment();
+
+    /**
+     * Find teachers by employment type
+     */
+    List<Teacher> findByEmploymentType(com.example.evaluationsystem.model.EmploymentType employmentType);
+
+    /**
+     * Find teachers by department ID and employment type
+     */
+    List<Teacher> findByDepartmentIdAndEmploymentType(Integer departmentId, 
+                                                       com.example.evaluationsystem.model.EmploymentType employmentType);
+
+    /**
+     * Count teachers by employment type
+     */
+    long countByEmploymentType(com.example.evaluationsystem.model.EmploymentType employmentType);
+
+    /**
+     * Find teachers who don't have a department assigned
+     */
+    @Query("SELECT t FROM Teacher t WHERE t.departmentId IS NULL")
+    List<Teacher> findTeachersWithoutDepartment();
+
+    /**
+     * Find teachers with their assignments for a specific academic year and semester
+     * This is useful for getting teachers with their subject assignments
+     */
+    @Query("SELECT DISTINCT t FROM Teacher t " +
+           "LEFT JOIN FETCH t.department d " +
+           "LEFT JOIN FETCH t.teacherAssignments ta " +
+           "WHERE ta.academicYear = :academicYear " +
+           "AND ta.semester = :semester")
+    List<Teacher> findTeachersWithAssignmentsByYearAndSemester(
+            @Param("academicYear") String academicYear,
+            @Param("semester") String semester);
 }

@@ -1,5 +1,6 @@
 package com.example.evaluationsystem.dto;
 
+import com.example.evaluationsystem.model.EmploymentType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,6 +20,7 @@ public class TeacherDTO {
     private String fullName;
     private String email;
     private String position;
+    private EmploymentType employmentType;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

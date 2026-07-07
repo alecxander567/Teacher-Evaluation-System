@@ -15,6 +15,7 @@ public class EvaluationSubmissionDTO {
     private Long id;
     private Long evaluationPeriodId;
     private Long teacherAssignmentId;
+    private Long evaluationLinkId;
     private String studentEmail;
     private String overallComment;
     private LocalDateTime submittedAt;

@@ -1,5 +1,6 @@
 package com.example.evaluationsystem.dto;
 
+import com.example.evaluationsystem.model.EmploymentType;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -32,4 +33,6 @@ public class TeacherRequestDTO {
 
     @Size(max = 100, message = "Position must not exceed 100 characters")
     private String position;
+
+    private EmploymentType employmentType;
 }

@@ -82,9 +82,15 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/evaluation-links/validate/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/evaluation-links/token/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/evaluation-periods/{id}").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/teacher-assignments/filter").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/teacher-assignments/selection").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/teacher-assignments/search").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/evaluation-forms/{id}/details").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/evaluation-submissions").permitAll()
+
+                        // Public student evaluation session flow (no login required).
+                        // Covers teacher listing, session lifecycle, per-teacher form
+                        // retrieval, and submission within a session.
+                        .requestMatchers("/api/student/evaluation/**").permitAll()
 
                         .anyRequest().authenticated()
                 )

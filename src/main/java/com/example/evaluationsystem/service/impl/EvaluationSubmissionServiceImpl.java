@@ -1,12 +1,15 @@
 // src/main/java/com/example/evaluationsystem/service/impl/EvaluationSubmissionServiceImpl.java
 package com.example.evaluationsystem.service.impl;
 
+import com.example.evaluationsystem.dto.EvaluationBatchStatusRequestDTO;
 import com.example.evaluationsystem.dto.EvaluationResponseDTO;
 import com.example.evaluationsystem.dto.EvaluationResponseRequestDTO;
 import com.example.evaluationsystem.dto.EvaluationSubmissionDTO;
 import com.example.evaluationsystem.dto.EvaluationSubmissionRequestDTO;
+import com.example.evaluationsystem.dto.TeacherEvaluationStatusDTO;
 import com.example.evaluationsystem.model.EvaluationResponse;
 import com.example.evaluationsystem.model.EvaluationSubmission;
+import com.example.evaluationsystem.model.TeacherAssignment;
 import com.example.evaluationsystem.repository.EvaluationPeriodRepository;
 import com.example.evaluationsystem.repository.EvaluationResponseRepository;
 import com.example.evaluationsystem.repository.EvaluationSubmissionRepository;
@@ -16,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -53,6 +57,7 @@ public class EvaluationSubmissionServiceImpl implements EvaluationSubmissionServ
         EvaluationSubmission submission = new EvaluationSubmission();
         submission.setEvaluationPeriodId(requestDTO.getEvaluationPeriodId());
         submission.setTeacherAssignmentId(requestDTO.getTeacherAssignmentId());
+        submission.setEvaluationLinkId(requestDTO.getEvaluationLinkId());
         submission.setStudentEmail(requestDTO.getStudentEmail());
         submission.setOverallComment(requestDTO.getOverallComment());
 
@@ -133,11 +138,46 @@ public class EvaluationSubmissionServiceImpl implements EvaluationSubmissionServ
         submissionRepository.deleteById(id);
     }
 
+    @Override
+    public List<TeacherEvaluationStatusDTO> checkBatchSubmissionStatus(EvaluationBatchStatusRequestDTO requestDTO) {
+        List<TeacherEvaluationStatusDTO> result = new ArrayList<>();
+
+        for (Long assignmentId : requestDTO.getTeacherAssignmentIds()) {
+            TeacherAssignment assignment = assignmentRepository.findById(assignmentId)
+                    .orElseThrow(() -> new RuntimeException("Teacher assignment not found with id: " + assignmentId));
+
+            boolean evaluated = submissionRepository.existsByEvaluationPeriodIdAndTeacherAssignmentIdAndStudentEmail(
+                    requestDTO.getEvaluationPeriodId(), assignmentId, requestDTO.getStudentEmail());
+
+            Long submissionId = null;
+            if (evaluated) {
+                submissionId = submissionRepository
+                        .findByPeriodIdAndAssignmentId(requestDTO.getEvaluationPeriodId(), assignmentId)
+                        .stream()
+                        .filter(s -> requestDTO.getStudentEmail().equalsIgnoreCase(s.getStudentEmail()))
+                        .map(EvaluationSubmission::getId)
+                        .findFirst()
+                        .orElse(null);
+            }
+
+            result.add(TeacherEvaluationStatusDTO.builder()
+                    .teacherId(assignment.getTeacherId())
+                    .teacherAssignmentId(assignmentId)
+                    .teacherName(assignment.getTeacher() != null ? assignment.getTeacher().getFullName() : null)
+                    .evaluated(evaluated)
+                    .submissionId(submissionId)
+                    .build());
+        }
+
+        return result;
+    }
+
     private EvaluationSubmissionDTO convertToDTO(EvaluationSubmission submission) {
         EvaluationSubmissionDTO dto = new EvaluationSubmissionDTO();
         dto.setId(submission.getId());
         dto.setEvaluationPeriodId(submission.getEvaluationPeriodId());
         dto.setTeacherAssignmentId(submission.getTeacherAssignmentId());
+        dto.setEvaluationLinkId(submission.getEvaluationLinkId());
         dto.setStudentEmail(submission.getStudentEmail());
         dto.setOverallComment(submission.getOverallComment());
         dto.setSubmittedAt(submission.getSubmittedAt());
@@ -162,7 +202,6 @@ public class EvaluationSubmissionServiceImpl implements EvaluationSubmissionServ
         EvaluationSubmissionDTO dto = convertToDTO(submission);
 
         if (submission.getResponses() != null && !submission.getResponses().isEmpty()) {
-            // Convert responses to DTOs
             List<EvaluationResponseDTO> responseDTOs = submission.getResponses().stream()
                     .map(response -> {
                         EvaluationResponseDTO responseDTO = new EvaluationResponseDTO();
@@ -183,7 +222,6 @@ public class EvaluationSubmissionServiceImpl implements EvaluationSubmissionServ
             dto.setResponses(responseDTOs);
             dto.setTotalQuestions(responseDTOs.size());
 
-            // Calculate answered questions and average rating
             long answered = responseDTOs.stream()
                     .filter(r -> r.getRating() != null)
                     .count();

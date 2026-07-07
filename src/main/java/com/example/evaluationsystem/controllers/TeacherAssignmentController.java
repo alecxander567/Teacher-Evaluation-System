@@ -1,3 +1,4 @@
+// src/main/java/com/example/evaluationsystem/controllers/TeacherAssignmentController.java
 package com.example.evaluationsystem.controllers;
 
 import java.util.List;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.evaluationsystem.dto.TeacherAssignmentDTO;
+import com.example.evaluationsystem.dto.TeacherSelectionDTO;
 import com.example.evaluationsystem.service.TeacherAssignmentService;
 
 import lombok.RequiredArgsConstructor;
@@ -39,5 +41,14 @@ public class TeacherAssignmentController {
             @RequestParam String semester) {
         return ResponseEntity.ok(
                 teacherAssignmentService.getAssignmentsByAcademicYearAndSemester(academicYear, semester));
+    }
+
+    @GetMapping("/selection")
+    public ResponseEntity<List<TeacherSelectionDTO>> getTeacherSelectionList(
+            @RequestParam String academicYear,
+            @RequestParam String semester,
+            @RequestParam(required = false) Integer departmentId) {
+        return ResponseEntity.ok(
+                teacherAssignmentService.getTeacherSelectionList(academicYear, semester, departmentId));
     }
 }

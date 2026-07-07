@@ -5,9 +5,11 @@ import com.example.evaluationsystem.dto.EvaluationLinkDTO;
 import com.example.evaluationsystem.dto.EvaluationLinkRequestDTO;
 import com.example.evaluationsystem.model.EvaluationForm;
 import com.example.evaluationsystem.model.EvaluationLink;
+import com.example.evaluationsystem.model.EvaluationPeriod;
 import com.example.evaluationsystem.model.EvaluationSubmission;
 import com.example.evaluationsystem.repository.EvaluationFormRepository;
 import com.example.evaluationsystem.repository.EvaluationLinkRepository;
+import com.example.evaluationsystem.repository.EvaluationPeriodRepository;
 import com.example.evaluationsystem.repository.EvaluationSubmissionRepository;
 import com.example.evaluationsystem.service.EvaluationLinkService;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -27,6 +30,7 @@ public class EvaluationLinkServiceImpl implements EvaluationLinkService {
 
     private final EvaluationLinkRepository linkRepository;
     private final EvaluationFormRepository formRepository;
+    private final EvaluationPeriodRepository periodRepository;
     private final EvaluationSubmissionRepository submissionRepository;
 
     @Value("${app.frontend-url}")
@@ -104,7 +108,33 @@ public class EvaluationLinkServiceImpl implements EvaluationLinkService {
                     if (!"active".equals(link.getStatus())) {
                         return false;
                     }
-                    return true;
+
+                    if (link.getEvaluationFormId() == null) {
+                        return false;
+                    }
+
+                    EvaluationForm form = link.getEvaluationForm();
+                    if (form == null) {
+                        form = formRepository.findById(link.getEvaluationFormId()).orElse(null);
+                    }
+                    if (form == null) {
+                        return false;
+                    }
+
+                    EvaluationPeriod period = form.getEvaluationPeriod();
+                    if (period == null) {
+                        period = periodRepository.findById(form.getEvaluationPeriodId()).orElse(null);
+                    }
+                    if (period == null) {
+                        return false;
+                    }
+
+                    if (!"active".equals(period.getStatus())) {
+                        return false;
+                    }
+
+                    LocalDate today = LocalDate.now();
+                    return !today.isBefore(period.getStartDate()) && !today.isAfter(period.getEndDate());
                 })
                 .orElse(false);
     }

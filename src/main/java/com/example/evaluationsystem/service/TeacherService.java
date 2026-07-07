@@ -38,6 +38,7 @@ public class TeacherService {
         teacher.setLastName(requestDTO.getLastName());
         teacher.setEmail(requestDTO.getEmail());
         teacher.setPosition(requestDTO.getPosition());
+        teacher.setEmploymentType(requestDTO.getEmploymentType());
         
         // Save to database
         Teacher savedTeacher = teacherRepository.save(teacher);
@@ -100,6 +101,7 @@ public class TeacherService {
         teacher.setLastName(requestDTO.getLastName());
         teacher.setEmail(requestDTO.getEmail());
         teacher.setPosition(requestDTO.getPosition());
+        teacher.setEmploymentType(requestDTO.getEmploymentType());
         
         Teacher updatedTeacher = teacherRepository.save(teacher);
         log.info("Teacher updated successfully with ID: {}", updatedTeacher.getId());
@@ -159,6 +161,7 @@ public class TeacherService {
                 .fullName(teacher.getFullName())
                 .email(teacher.getEmail())
                 .position(teacher.getPosition())
+                .employmentType(teacher.getEmploymentType())
                 .createdAt(teacher.getCreatedAt())
                 .updatedAt(teacher.getUpdatedAt())
                 .build();

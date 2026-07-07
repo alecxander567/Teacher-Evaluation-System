@@ -1,8 +1,10 @@
 // src/main/java/com/example/evaluationsystem/controllers/EvaluationSubmissionController.java
 package com.example.evaluationsystem.controllers;
 
+import com.example.evaluationsystem.dto.EvaluationBatchStatusRequestDTO;
 import com.example.evaluationsystem.dto.EvaluationSubmissionDTO;
 import com.example.evaluationsystem.dto.EvaluationSubmissionRequestDTO;
+import com.example.evaluationsystem.dto.TeacherEvaluationStatusDTO;
 import com.example.evaluationsystem.service.EvaluationSubmissionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -82,5 +84,11 @@ public class EvaluationSubmissionController {
     public ResponseEntity<Void> deleteSubmission(@PathVariable Long id) {
         submissionService.deleteSubmission(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/check-batch-status")
+    public ResponseEntity<List<TeacherEvaluationStatusDTO>> checkBatchStatus(
+            @Valid @RequestBody EvaluationBatchStatusRequestDTO requestDTO) {
+        return ResponseEntity.ok(submissionService.checkBatchSubmissionStatus(requestDTO));
     }
 }

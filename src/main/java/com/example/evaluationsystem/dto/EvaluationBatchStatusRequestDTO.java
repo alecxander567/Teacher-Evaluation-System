@@ -1,7 +1,8 @@
-// src/main/java/com/example/evaluationsystem/dto/EvaluationSubmissionRequestDTO.java
+// src/main/java/com/example/evaluationsystem/dto/EvaluationBatchStatusRequestDTO.java
 package com.example.evaluationsystem.dto;
 
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,20 +13,14 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class EvaluationSubmissionRequestDTO {
+public class EvaluationBatchStatusRequestDTO {
 
     @NotNull(message = "Evaluation period ID is required")
     private Long evaluationPeriodId;
 
-    @NotNull(message = "Teacher assignment ID is required")
-    private Long teacherAssignmentId;
-
-    private Long evaluationLinkId;
-
     @Email(message = "Invalid email format")
     private String studentEmail;
 
-    private String overallComment;
-
-    private List<EvaluationResponseRequestDTO> responses;
+    @NotEmpty(message = "At least one teacher assignment ID is required")
+    private List<Long> teacherAssignmentIds;
 }
