@@ -1,11 +1,13 @@
 // src/main/java/com/example/evaluationsystem/service/AdminService.java
 package com.example.evaluationsystem.service;
 
+import com.example.evaluationsystem.dto.AdminUpdateDTO;
 import com.example.evaluationsystem.model.Admin;
 import com.example.evaluationsystem.repository.AdminRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -47,28 +49,46 @@ public class AdminService {
         return adminRepository.findByEmail(email);
     }
 
-    // NEW METHOD - Add this
     public Admin findAdminByEmail(String email) {
         return adminRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Admin not found with email: " + email));
     }
 
-    public Admin updateAdmin(Long id, Admin adminDetails) {
+    @Transactional
+    public Admin updateAdmin(Long id, AdminUpdateDTO updateDTO) {
         Admin admin = adminRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Admin not found"));
+                .orElseThrow(() -> new RuntimeException("Admin not found with id: " + id));
 
-        admin.setFirstName(adminDetails.getFirstName());
-        admin.setLastName(adminDetails.getLastName());
-        admin.setEmail(adminDetails.getEmail());
+        // Check if email is being changed and if it's already taken
+        if (updateDTO.getEmail() != null && !admin.getEmail().equals(updateDTO.getEmail())) {
+            if (adminRepository.existsByEmail(updateDTO.getEmail())) {
+                throw new RuntimeException("Email already in use by another admin");
+            }
+            admin.setEmail(updateDTO.getEmail());
+        }
 
-        if (adminDetails.getPassword() != null && !adminDetails.getPassword().isEmpty()) {
-            admin.setPassword(passwordEncoder.encode(adminDetails.getPassword()));
+        // Update fields
+        if (updateDTO.getFirstName() != null) {
+            admin.setFirstName(updateDTO.getFirstName());
+        }
+        
+        if (updateDTO.getLastName() != null) {
+            admin.setLastName(updateDTO.getLastName());
+        }
+
+        // Only update password if provided
+        if (updateDTO.getPassword() != null && !updateDTO.getPassword().isEmpty()) {
+            admin.setPassword(passwordEncoder.encode(updateDTO.getPassword()));
         }
 
         return adminRepository.save(admin);
     }
 
+    @Transactional
     public void deleteAdmin(Long id) {
+        if (!adminRepository.existsById(id)) {
+            throw new RuntimeException("Admin not found with id: " + id);
+        }
         adminRepository.deleteById(id);
     }
 

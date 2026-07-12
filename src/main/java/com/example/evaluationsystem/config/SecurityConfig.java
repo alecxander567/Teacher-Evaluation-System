@@ -1,6 +1,7 @@
 // src/main/java/com/example/evaluationsystem/config/SecurityConfig.java
 package com.example.evaluationsystem.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -21,6 +22,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -28,6 +30,9 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final UserDetailsService userDetailsService;
+
+    @Value("${app.allowed-origins}")
+    private String allowedOrigins;
 
     public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter, UserDetailsService userDetailsService) {
         this.jwtAuthFilter = jwtAuthFilter;
@@ -54,8 +59,10 @@ public class SecurityConfig {
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
+        List<String> origins = Arrays.asList(allowedOrigins.split(","));
+
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(Arrays.asList("*"));
+        configuration.setAllowedOrigins(origins);
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Type"));
@@ -75,10 +82,6 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**", "/auth/**").permitAll()
                         .requestMatchers("/error").permitAll()
-
-                        // Public student-facing evaluation flow (no login required).
-                        // Kept as narrow, method-specific rules so the rest of each
-                        // controller (create/update/delete/list-all) stays protected.
                         .requestMatchers(HttpMethod.GET, "/api/evaluation-links/validate/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/evaluation-links/token/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/evaluation-periods/{id}").permitAll()
@@ -86,12 +89,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/teacher-assignments/search").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/evaluation-forms/{id}/details").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/evaluation-submissions").permitAll()
-
-                        // Public student evaluation session flow (no login required).
-                        // Covers teacher listing, session lifecycle, per-teacher form
-                        // retrieval, and submission within a session.
                         .requestMatchers("/api/student/evaluation/**").permitAll()
-
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

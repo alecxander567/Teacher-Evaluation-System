@@ -1,6 +1,7 @@
 // src/main/java/com/example/evaluationsystem/config/CorsConfig.java
 package com.example.evaluationsystem.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
@@ -8,20 +9,22 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
 import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 public class CorsConfig {
 
+    @Value("${app.allowed-origins}")
+    private String allowedOrigins;
+
     @Bean
     public CorsFilter corsFilter() {
+        List<String> origins = Arrays.asList(allowedOrigins.split(","));
+
         CorsConfiguration corsConfiguration = new CorsConfiguration();
 
         // Allow specific origins
-        corsConfiguration.setAllowedOrigins(Arrays.asList(
-                "http://localhost:5173",  // Vite dev server
-                "http://localhost:3000",   // Alternative dev port
-                "http://localhost:5174"    // If Vite uses another port
-        ));
+        corsConfiguration.setAllowedOrigins(origins);
 
         // Allow all HTTP methods
         corsConfiguration.setAllowedMethods(Arrays.asList(
