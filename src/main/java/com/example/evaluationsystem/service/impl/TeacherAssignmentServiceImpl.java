@@ -50,7 +50,6 @@ public class TeacherAssignmentServiceImpl implements TeacherAssignmentService {
                 .collect(Collectors.toList());
     }
 
-    // ========== NEW METHOD ==========
     @Override
     public List<TeacherSelectionDTO> getTeacherSelectionList(
             String academicYear, String semester, Integer departmentId) {
@@ -94,6 +93,38 @@ public class TeacherAssignmentServiceImpl implements TeacherAssignmentService {
 
         result.sort(Comparator.comparing(TeacherSelectionDTO::getLastName, Comparator.nullsLast(String::compareTo)));
         return result;
+    }
+
+    @Override
+    public TeacherAssignmentDTO createAssignment(TeacherAssignmentDTO request) {
+
+        boolean alreadyExists = teacherAssignmentRepository
+                .existsByTeacherIdAndSubjectIdAndAcademicYearAndSemester(
+                        request.getTeacherId(),
+                        request.getSubjectId(),
+                        request.getAcademicYear(),
+                        request.getSemester());
+
+        if (alreadyExists) {
+            throw new RuntimeException(
+                    "This teacher is already assigned to this subject for the given academic year and semester.");
+        }
+
+        TeacherAssignment ta = new TeacherAssignment();
+        ta.setTeacherId(request.getTeacherId());
+        ta.setSubjectId(request.getSubjectId());
+        ta.setAcademicYear(request.getAcademicYear());
+        ta.setSemester(request.getSemester());
+
+        TeacherAssignment saved = teacherAssignmentRepository.save(ta);
+
+        // teacher/subject are insertable=false/updatable=false read-only associations,
+        // so they won't be populated on `saved` yet - reload to get them joined in
+        // for convertToDTO to fill in teacherName/subjectName.
+        TeacherAssignment reloaded = teacherAssignmentRepository.findById(saved.getId())
+                .orElseThrow(() -> new RuntimeException("Failed to reload saved assignment"));
+
+        return convertToDTO(reloaded);
     }
 
     private TeacherAssignmentDTO convertToDTO(TeacherAssignment ta) {

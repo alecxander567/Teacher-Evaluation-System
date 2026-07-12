@@ -1,3 +1,4 @@
+// TeacherAssignmentRepository.java
 package com.example.evaluationsystem.repository;
 
 import com.example.evaluationsystem.model.TeacherAssignment;
@@ -22,4 +23,7 @@ public interface TeacherAssignmentRepository extends JpaRepository<TeacherAssign
     List<TeacherAssignment> findByTeacherId(Long teacherId);
 
     List<TeacherAssignment> findBySubjectId(Long subjectId);
+
+    boolean existsByTeacherIdAndSubjectIdAndAcademicYearAndSemester(
+            Long teacherId, Long subjectId, String academicYear, String semester);
 }

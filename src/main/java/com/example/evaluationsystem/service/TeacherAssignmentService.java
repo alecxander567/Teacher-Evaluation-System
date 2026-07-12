@@ -1,4 +1,4 @@
-// src/main/java/com/example/evaluationsystem/service/TeacherAssignmentService.java
+// TeacherAssignmentService.java
 package com.example.evaluationsystem.service;
 
 import com.example.evaluationsystem.dto.TeacherAssignmentDTO;
@@ -15,4 +15,6 @@ public interface TeacherAssignmentService {
     List<TeacherAssignmentDTO> getAllAssignments();
 
     List<TeacherSelectionDTO> getTeacherSelectionList(String academicYear, String semester, Integer departmentId);
+
+    TeacherAssignmentDTO createAssignment(TeacherAssignmentDTO request);
 }
